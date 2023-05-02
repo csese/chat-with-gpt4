@@ -1,38 +1,39 @@
 
+from langchain.agents import Tool
+from langchain.memory import ConversationBufferMemory
 from langchain.chat_models import ChatOpenAI
-from langchain.prompts.chat import (
-    ChatPromptTemplate,
-    SystemMessagePromptTemplate,
-    AIMessagePromptTemplate,
-    HumanMessagePromptTemplate,
-)
-from langchain.schema import (
-    AIMessage,
-    HumanMessage,
-    SystemMessage
-)
+from langchain.utilities import SerpAPIWrapper
+from langchain.agents import initialize_agent
+from langchain.agents import AgentType
 
 
-from dotenv import load_dotenv
-load_dotenv()
 
+llm = ChatOpenAI(temperature=0, model_name='gpt-3.5-turbo')
 
-chat = ChatOpenAI(temperature=0, model_name='gpt-3.5-turbo')
-
-system_template = """Assistant is a large language model trained by OpenAI.
-Assistant is designed to be able to assist with a wide range of tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of topics. As a language model, Assistant is able to generate human-like text based on the input it receives, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
-Assistant is constantly learning and improving, and its capabilities are constantly evolving. It is able to process and understand large amounts of text, and can use this knowledge to provide accurate and informative responses to a wide range of questions. Additionally, Assistant is able to generate its own text based on the input it receives, allowing it to engage in discussions and provide explanations and descriptions on a wide range of topics.
-Overall, Assistant is a powerful tool that can help with a wide range of tasks and provide valuable insights and information on a wide range of topics. Whether you need help with a specific question or just want to have a conversation about a particular topic, Assistant is here to assist.
-"""
-
-user_message = "Translate this sentence from English to French. I love programming."
-
-messages = [
-    SystemMessage(content=system_template),
-    HumanMessage(content=user_message)
+search = SerpAPIWrapper()
+tools = [
+    Tool(
+        name = "Current Search",
+        func=search.run,
+        description="useful for when you need to answer questions about current events or the current state of the world. the input to this should be a single search term."
+    ),
 ]
 
-response = chat(messages)
+memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
-response.content
+chatgpt_chain = initialize_agent(
+    tools=tools,
+    llm=llm,
+    agent=AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION,
+    verbose=True,
+    memory=memory)
+
+
+
+def chat(user_input):
+
+    results = chatgpt_chain.run(user_input)
+
+    return results
+
 

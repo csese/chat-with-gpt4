@@ -1,6 +1,6 @@
-import openai
-audio_file= open("/path/to/file/audio.mp3", "rb")
-transcript = openai.Audio.transcribe("whisper-1", audio_file)
+#import openai
+#audio_file= open("/path/to/file/audio.mp3", "rb")
+#transcript = openai.Audio.transcribe("whisper-1", audio_file)
 
 
 
@@ -69,7 +69,7 @@ def record_and_transcribe(chunk_size=1024, sample_rate=16000, channels=1, record
     return transcription
 
 
-transcription = record_and_transcribe()
-print("Transcription:", transcription)
+#transcription = record_and_transcribe()
+#print("Transcription:", transcription)
 
 
